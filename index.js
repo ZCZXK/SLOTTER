@@ -15,7 +15,7 @@ const Database = require('better-sqlite3');
 const express = require('express');
 require('dotenv').config();
 
-// Web Server
+// Web Server to Keep Hosting Online
 const app = express();
 app.get('/', (req, res) => res.status(200).send({ status: 'Online', timestamp: new Date() }));
 app.listen(process.env.PORT || 3000, () => console.log('Web server heartbeat initialized.'));
@@ -88,7 +88,7 @@ client.once('ready', () => {
   console.log(`[SYSTEM] Logged in as ${client.user.tag}`);
   client.user.setActivity('Slot Management | $setup', { type: 3 });
 
-  // Cron Check for Expired Slots (Every 60s)
+  // Cron Check for Expired Slots (Every 60 Seconds)
   setInterval(async () => {
     const now = Date.now();
     const expiredSlots = db.prepare('SELECT * FROM active_slots WHERE expires_at != -1 AND expires_at <= ?').all(now);
@@ -115,7 +115,7 @@ client.on('messageCreate', async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  // Admin Commands
+  // ADMIN COMMANDS
   if (command === 'setup') {
     if (!message.member.permissions.has(PermissionFlagsBits.Administrator)) {
       return message.reply({ embeds: [errorEmbed('Access Denied', 'You require `Administrator` privileges.')] });
@@ -202,8 +202,9 @@ client.on('messageCreate', async (message) => {
     `).run(message.guild.id, emoji);
 
     return message.reply({ embeds: [new EmbedBuilder().setTitle('✅ Vouch Emoji Updated').setDescription(`Bot will now react with ${emoji} on new vouches.`).setColor(0x57F287)] });
-        }
-// Slot Commands
+  }
+
+  // SLOT OWNER COMMANDS
   const slot = db.prepare('SELECT * FROM active_slots WHERE user_id = ?').get(message.author.id);
 
   if (command === 'title') {
@@ -286,7 +287,7 @@ client.on('messageCreate', async (message) => {
     if (message.deletable) await message.delete();
   }
 
-  // Vouches
+  // VOUCH COMMANDS
   if (command === 'vouch') {
     const config = db.prepare('SELECT * FROM guild_config WHERE guild_id = ?').get(message.guild.id);
 
@@ -329,7 +330,7 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-// Button and Modal Interactions
+// INTERACTION HANDLERS
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isButton()) {
     if (interaction.customId === 'btn_claim_slot') {
